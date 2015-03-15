@@ -1,0 +1,197 @@
+#include <stdio.h>
+#define DIM 100
+#define ASCII 48
+#define N_BANCO_MAX 1000
+#define N_STRING_IO_MAX 60
+
+
+typedef struct {
+	char nome[40]; /* caracteristicas do banco*/
+	int clas, ref; 
+
+
+} banco;
+
+int i, j;
+
+
+
+void lestring (char s[]) {
+	char c;
+
+
+	c = getchar();
+	for (i = 0; i < DIM-1 && c != EOF && c != '\n'; i++) {
+		s[i] = c;
+		c = getchar();
+	}
+	if (i < DIM-1 && c == '\n'){
+		s[i] = c;
+		i++;
+	}
+	s[i] = '\0';
+
+
+}
+
+void adicionabanco (char s[], banco b[], int cont) {
+
+
+	for (j = 2; j < DIM; j++){
+
+		if (s[j] == ' '){
+			j++;
+			break;
+		} 
+
+		b[cont].nome[j-2] = s[j];
+
+	}
+	/*printf("j = %d\n", j);*/
+	b[cont].clas = (int) s[j] - ASCII;
+
+	j += 2;
+
+
+	for (; j < DIM; j++){
+		/*printf("O j = %d e o s[j] = %d ou %c\n", j, s[j], s[j]);*/
+		if (s[j] == '\0' || s[j] == '\n') break;
+		b[cont].ref = (b[cont].ref * 10) + (s[j] - ASCII); /* MUDAR FODA-SE */
+		/*printf("temp = %d\n", temp);*/
+
+	}
+	/*printf("%d %d  %d", b[cont].ref, b[cont].ref - b[cont].ref, b[cont].ref + 1);
+	b[cont].ref = temp;*/
+
+
+
+}
+
+
+
+void escreve_l (banco arg[], int cont, char l) {
+
+	if (l == '0') {
+		for (j = 0; j < cont; j++)
+			printf("%d %s %d\n",arg[j].ref, arg[j].nome, arg[j].clas);
+	}
+
+	else if (l == '1') {
+		printf("1\n");
+
+	}
+
+	else if (l == '2') {
+		printf("2\n");
+
+	}
+	else printf("VAI A MERDA\n");
+
+}
+
+void altera_clas (char s[], banco arg[], int cont, char tipo){
+
+	int ref = 0, muda = 0;
+
+	for (j = 2; j < 100; j++) { /* MUDAR O 100*/
+
+		if (s[j] == '\0' || s[j] == '\n') break;
+		ref = ref * 10 + (s[j] - ASCII);
+		printf("ref é %d\n", ref);
+	}
+
+	if (tipo == 'r') muda = 1;
+
+	for (j = 0; j < cont; j++) {
+		printf("arg ref %d %c e ref intro %d %c \n", arg[j].ref, arg[j].ref, ref, ref);
+		if (arg[j].ref == ref){
+			printf("entrou\n");
+			arg[j].clas = muda;
+		}
+	}
+}
+
+
+void emprestimo (char s[], banco arg[]){
+	int ref1 = 0, ref2 = 0;
+	for (j = 2; j < N_STRING_IO_MAX; j++){
+		
+		ref1 = ref1 * 10 + s[j] - ASCII;		
+		if (s[j] != ' ') break;
+
+	}
+	for (++j; j < N_STRING_IO_MAX; j++) {
+		ref2 = ref2 * 10 + s[j] - ASCII;
+		if (s[j] == '\n' || s[j] == '\0') break;
+	}
+
+	printf("ref1: %d  ref2: %d", ref1, ref2);
+}
+
+
+int main() {
+
+	banco lista_bancos[N_BANCO_MAX];
+
+	char string_io[DIM];
+	int num_bancos = 0;
+
+	lestring(string_io);
+
+	char _1st = string_io[0];
+
+	printf("%c\n", _1st);
+
+
+	while (_1st != 'x') {
+
+
+		if (string_io[0] == 'a') {
+
+			adicionabanco(string_io, lista_bancos, num_bancos);
+			num_bancos++;
+		}
+
+		else if (_1st == 'k' || _1st == 'r')
+			altera_clas(string_io, lista_bancos, num_bancos, _1st);
+
+		else if (_1st == 'e')
+			printf("e\n");
+
+		else if (_1st == 'p')
+			printf("p\n");
+
+		else if (_1st == 'l')
+			escreve_l(lista_bancos, num_bancos, string_io[2]);
+
+		else if (_1st == 'K')
+			printf("K\n");
+
+		else 
+			printf("outra vez sff\n");
+
+		lestring(string_io);
+		_1st = string_io[0];
+
+
+	}
+
+	/*for (j = 0; j < 10; j++)
+		printf("clas = %c // ref = %d // nome = %s\n", lista_bancos[j].clas, lista_bancos[j].ref, lista_bancos[j].nome);*/
+
+
+
+
+	int n_bancos_POS = 0;
+	
+	for(j = 0; j <= num_bancos; j++) {
+		if (lista_bancos[j].clas == 1)
+		n_bancos_POS++;
+	}
+
+	printf("%d %d", num_bancos, n_bancos_POS);
+
+
+return 0;
+}
+
