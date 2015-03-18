@@ -15,17 +15,101 @@ typedef struct {
 
 } banco;
 
-int i, j;
-/* int dim_string_io = 0 --- talvez não seja preciso*/ 
+						/* Declaracao de variaveis */ 
 
+int i, j, ref1, ref2, valor;
+int num_bancos = 0;
+/* int dim_string_io = 0 --- talvez nÃ£o seja preciso*/ 
+banco lista_bancos[N_BANCO_MAX];
+
+						/* Prototipos de funcoes */
 
 void lestring (char s[]);
 void adicionabanco (char s[], banco b[], int cont);
 void escreve_l (banco arg[], int cont, char l);
 void altera_clas (char s[], banco arg[], int cont, char tipo);
-void buscar_refs_e_valor (char s[]);
-void emprestimo (char s[], banco arg[], int cont, int vectorderefs[]);
-int main(); /* :^) */
+void buscar_refs_e_valor (char s[], int v[]);
+void emprestimo (char s[], banco arg[], int cont, int v[]);
+void abate (char s[], banco arg[], int cont, int v[]);
+
+						/* Codigo Principal */
+
+int main() {
+
+	/* printf("ALIVE YES\n", _1st); /* se imprimir nÃ£o deu seg fault :^) */
+
+	char string_io[DIM]; 
+	int vectorderefs[3];
+	lestring(string_io);
+	char _1st = string_io[0];
+
+	/* for (j = 0; j < 500; j++) lista_bancos[10].vector[j] = 0;
+
+	lista_bancos[10].vector[400] = 12;
+	for (j = 0; j < 1000; j++) printf("banco 0 pos %d = %d\n",j, lista_bancos[0].vector[j]);
+	for (j = 0; j < 600; j++) printf("banco 10 pos %d = %d\n",j, lista_bancos[10].vector[j]);
+
+	debug, nÃ£o se passem*/
+
+
+
+
+	printf("%c\n", _1st); 
+
+
+	while (_1st != 'x') {
+
+
+		if (string_io[0] == 'a') {
+
+			adicionabanco(string_io, lista_bancos, num_bancos);
+			num_bancos++;
+		}
+
+		else if (_1st == 'k' || _1st == 'r')
+			altera_clas(string_io, lista_bancos, num_bancos, _1st);
+
+		else if (_1st == 'e'){ 
+			buscar_refs_e_valor(string_io, vectorderefs);
+			emprestimo(string_io, lista_bancos, num_bancos, vectorderefs);
+
+		}
+
+		/* se usarmos o vector de refs entao o string_io nao faz nada nestas duas funÃ§oes */
+
+		else if (_1st == 'p'){
+			buscar_refs_e_valor(string_io, vectorderefs);
+			abate(string_io, lista_bancos, num_bancos, vectorderefs);
+		}
+		else if (_1st == 'l')
+			escreve_l(lista_bancos, num_bancos, string_io[2]);
+
+		else if (_1st == 'K')
+			printf("K\n");
+
+		else 
+			printf("LOL\n");
+
+		lestring(string_io);
+		_1st = string_io[0]; /* ??
+		/* dim_string_io = strlen(string_io) */
+
+	}
+
+
+
+	int n_bancos_POS = 0;
+	
+	for (j = 0; j <= num_bancos; j++) {
+		if (lista_bancos[j].clas == 1)
+		n_bancos_POS++;
+	}
+
+	printf("%d %d", num_bancos, n_bancos_POS);
+
+
+	return 0;
+}
 
 void lestring (char s[]) {
 	char c;
@@ -108,7 +192,7 @@ void altera_clas (char s[], banco arg[], int cont, char tipo){
 
 		if (s[j] == '\0' || s[j] == '\n') break; /* vai buscar a referencia */
 		ref = ref * 10 + (s[j] - ASCII);
-		/* printf("ref é %d\n", ref); */
+		/* printf("ref Ã© %d\n", ref); */
 	}
 
 	if (tipo == 'r') muda = 1;
@@ -123,9 +207,9 @@ void altera_clas (char s[], banco arg[], int cont, char tipo){
 }
 
 
-void buscar_refs_e_valor (char s[]) { /* talvez refazer */
+void buscar_refs_e_valor (char s[], int v[] ) { /* talvez refazer */
 
-	int ref1 = 0, ref2 = 0, valor = 0, vectorderefs[3];
+	int ref1 = 0, ref2 = 0, valor = 0;
 
 	for (j = 2; j < N_STRING_IO_MAX; j++){ /* vai buscar a primeira ref */
 		
@@ -143,147 +227,96 @@ void buscar_refs_e_valor (char s[]) { /* talvez refazer */
 		if (s[j] == '\n' || s[j] == '\0') break;
 		valor = valor * 10 + s[j] - ASCII;
 	}
-	vectorderefs[0] = ref1, vectorderefs[1] = ref2, vectorderefs[2] = valor;
+	v[0] = ref1, v[1] = ref2, v[2] = valor;
 	
 	/*
 	eu sei, muita coisa repetida. logo se altera 
 	isto serve para nao repetirmos o mesmo processo no emprestimo e no abate
+
 	*/
+
 }
 
 
-void emprestimo (char s[], banco arg[], int cont, int vectorderefs[]){ /* reescrever */
+void emprestimo (char s[], banco arg[], int cont, int v[]) { /* reescrever */
 
 	
-	int ref1 = vectorderefs[0], ref2 = vectorderefs[1], valor = vectorderefs[3];
+	int ref1 = v[0], ref2 = v[1], valor = v[2];
 	int temp;
 
-	for (j = 0; j < cont; j++);{
+	for (j = 0; j < cont; j++) {
 
 		if (arg[j].ref == ref1){ /* preenche a lista dos que devem do banco que emprestou */
-
-			temp = ++arg[j].emprestou; /* falta contemplar as situações onde já está inserido */
-			arg[j].l_de_devedores[temp][0] = ref2;
-			arg[j].l_de_devedores[temp][1] += valor;
+			for (i = 0; i < cont; i++) {
+				if (arg[j].l_de_devedores[i][0] == ref2) {/* Se ja imprestou $$ ao outro entao apenas acumula a divida */
+					arg[j].l_de_devedores[i][1] += valor;
+					printf("devedor: %d, valor: %d\n", arg[j].l_de_devedores[i][0], arg[j].l_de_devedores[i][1]);
+					break;
+				}
+				else {
+					temp = arg[j].emprestou++; 
+					arg[j].l_de_devedores[temp][0] = ref2;
+					arg[j].l_de_devedores[temp][1] += valor;
+					printf("devedor: %d, valor: %d\n", arg[j].l_de_devedores[temp][0], arg[j].l_de_devedores[temp][1]);
+					break;
+				}
+			}
 		}
-
-		if (arg[j].ref == ref2){ /* preenche a lista de credores do banco que pediu emprestado */
-
-			temp = ++ arg[j].temdivida; /* falta contemplar as situações onde já está inserido */
-			arg[j].l_de_credores[temp][0] = ref1;
-			arg[j].l_de_credores[temp][1] += valor;
-
-		}
-
-
-	}
-
-	printf("ref1: %d, ref2: %d, valor: %d", ref1, ref2, valor);
-}
-/*
-void abate (char s[], banco arg[], int cont, int vectorderefs[]){
-
-	int ref1 = vectorderefs[0], ref2 = vectorderefs[1], valor = vectorderefs[3];
-
-	for (j = 0; j < cont; j++){
-
-		if (arg[j].ref == ref1)
-
-
-
-
-
-
-	}
-
-
-
-
-}
-*/
-int main() {
-
-	banco lista_bancos[N_BANCO_MAX];
-
-
-
-	printf("ALIVE YES\n", _1st); /* se imprimir não deu seg fault :^) */
-
-	char string_io[DIM]; 
-	int num_bancos = 0;
-	int vectorderefs[3];
-	lestring(string_io);
-
-	char _1st = string_io[0];
-
-	/* for (j = 0; j < 500; j++) lista_bancos[10].vector[j] = 0;
-
-	lista_bancos[10].vector[400] = 12;
-	for (j = 0; j < 1000; j++) printf("banco 0 pos %d = %d\n",j, lista_bancos[0].vector[j]);
-	for (j = 0; j < 600; j++) printf("banco 10 pos %d = %d\n",j, lista_bancos[10].vector[j]);
-
-	debug, não se passem*/
-
-
-
-
-	printf("%c\n", _1st); 
-
-
-
-
-
-	while (_1st != 'x') {
-
-
-		if (string_io[0] == 'a') {
-
-			adicionabanco(string_io, lista_bancos, num_bancos);
-			num_bancos++;
-		}
-
-		else if (_1st == 'k' || _1st == 'r')
-			altera_clas(string_io, lista_bancos, num_bancos, _1st);
-
-		else if (_1st == 'e'){ 
-			buscar_refs_e_valor(string_io);
-			emprestimo(string_io, lista_bancos, num_bancos, vectorderefs);
-
-		}
-
-		/* se usarmos o vector de refs entao o string_io nao faz nada nestas duas funçoes */
-
-		else if (_1st == 'p'){
-			buscar_refs_e_valor(string_io);
-			abate(lista_bancos, num_bancos, vectorderefs);
-		}
-		else if (_1st == 'l')
-			escreve_l(lista_bancos, num_bancos, string_io[2]);
-
-		else if (_1st == 'K')
-			printf("K\n");
-
-		else 
-			printf("LOL\n");
-
-		lestring(string_io);
-		_1st = string_io[0]; /* ??
-		/* dim_string_io = strlen(string_io) */
-
-	}
-
-
-
-	int n_bancos_POS = 0;
 	
-	for (j = 0; j <= num_bancos; j++) {
-		if (lista_bancos[j].clas == 1)
-		n_bancos_POS++;
+		if (arg[j].ref == ref2){ /* preenche a lista de credores do banco que pediu emprestado */
+			for (i = 0; i < cont; i++) {
+
+				if (arg[j].l_de_credores[i][0] == ref1) {
+					arg[j].l_de_credores[i][1] += valor;
+					printf("credor: %d, valor: %d\n", arg[j].l_de_credores[i][0], arg[j].l_de_credores[i][1]);
+					break;
+				}
+				else {
+					temp = arg[j].temdivida++;
+					arg[j].l_de_credores[temp][0] = ref1;
+					arg[j].l_de_credores[temp][1] += valor;
+					printf("credor: %d, valor: %d\n", arg[j].l_de_credores[temp][0], arg[j].l_de_credores[temp][1]);
+					break;
+				}
+			}
+		}
 	}
+	/* printf("ref1: %d, ref2: %d, valor: %d\n", ref1, ref2, valor); */
+}
 
-	printf("%d %d", num_bancos, n_bancos_POS);
+void abate (char s[], banco arg[], int cont, int v[]) {
+
+	int ref1 = v[0], ref2 = v[1], valor = v[2];
+	int temp;
+
+	for (j = 0; j < cont; j++) {
+
+		if (arg[j].ref == ref2){ /* preenche a lista dos que devem do banco que emprestou */
+			for (i = 0; i < cont; i++) {
+				if (arg[j].l_de_devedores[i][0] == ref1) { /* Se ja imprestou $$ ao outro entao apenas acumula a divida */
+					arg[j].l_de_devedores[i][1] -= valor;
+					printf("Valor novo (Credor): %d\n", arg[j].l_de_devedores[i][1]);
+					break;
+				}
+			}
+		}
+	
+		if (arg[j].ref == ref1){ /* preenche a lista de credores do banco que pediu emprestado */
+			for (i = 0; i < cont; i++) {
+				if (arg[j].l_de_credores[i][0] == ref2) {
+					arg[j].l_de_credores[i][1] -= valor;
+					printf("Valor novo (Devedor): %d\n", arg[j].l_de_credores[i][1]);
+					break;
+			}
+		}
+	}
+	/* printf("ref1: %d, ref2: %d, valor: %d\n", ref1, ref2, valor); */
+}
 
 
-	return 0;
+
+
+
+
 }
 
